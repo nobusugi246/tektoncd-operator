@@ -1,0 +1,12 @@
+apiVersion: tekton.dev/v1beta
+kind: Companion
+metadata:
+  name: my-tektoncd-companions
+spec:
+  namespace: tekton-pipelines
+  pipeline:
+    version: v0.17.1
+  dashboard:
+    version: v0.10.1
+  triggers:
+    version: v0.8.1

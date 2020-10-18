@@ -1,0 +1,41 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: companions.tekton.dev
+spec:
+  group: tekton.dev
+  versions:
+    - name: v1beta
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                namespace:
+                  type: string
+                pipeline:
+                  type: object
+                  properties:
+                    version:
+                      type: string
+                dashboard:
+                  type: object
+                  properties:
+                    version:
+                      type: string
+                triggers:
+                  type: object
+                  properties:
+                    version:
+                      type: string
+  scope: Cluster
+  names:
+    plural: companions
+    singular: companion
+    kind: Companion
+    shortNames:
+    - companions
