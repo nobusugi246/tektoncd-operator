@@ -77,7 +77,16 @@ def dashboard(spec, old, new, logger, **kwargs):
     if new:
         subprocess.run(f"kubectl apply -f https://raw.githubusercontent.com/tektoncd/catalog/master/task/kaniko/{new}/kaniko.yaml -n {spec.get('namespace', 'default')}", shell=True, check=True)
     elif old:
-        subprocess.run(f"kubectl delete task.tekton.dev/kaniko -n {spec.get('namespace', 'tekton-pipelines')}", shell=True, check=True)
+        subprocess.run(f"kubectl delete task.tekton.dev/kaniko -n {spec.get('namespace', 'default')}", shell=True, check=True)
+
+
+@kopf.on.field('tekton.dev', 'v1beta', 'companions', field='spec.git-clone.version')
+def dashboard(spec, old, new, logger, **kwargs):
+    logger.info(f'git-clone: {old=}, {new=}')
+    if new:
+        subprocess.run(f"kubectl apply -f https://raw.githubusercontent.com/tektoncd/catalog/master/task/git-clone/{new}/git-clone.yaml -n {spec.get('namespace', 'default')}", shell=True, check=True)
+    elif old:
+        subprocess.run(f"kubectl delete task.tekton.dev/git-clone -n {spec.get('namespace', 'default')}", shell=True, check=True)
 
 
 @kopf.on.delete('tekton.dev', 'v1beta', 'companions')
@@ -90,6 +99,7 @@ def uninstall(spec, logger, **kwargs):
                logger)
 
         subprocess.run(f"kubectl delete task.tekton.dev/kaniko -n {spec.get('namespace', 'default')}", shell=True, check=False)
+        subprocess.run(f"kubectl delete task.tekton.dev/git-clone -n {spec.get('namespace', 'default')}", shell=True, check=False)
 
     except ObjectDoesNotExist:
         pass

@@ -37,6 +37,11 @@ spec:
                   properties:
                     version:
                       type: string
+                git-clone:
+                  type: object
+                  properties:
+                    version:
+                      type: string
   scope: Cluster
   names:
     plural: companions

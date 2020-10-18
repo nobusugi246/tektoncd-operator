@@ -12,3 +12,5 @@ spec:
     version: v0.10.1
   kaniko:
     version: "0.1"
+  git-clone:
+    version: "0.2"
