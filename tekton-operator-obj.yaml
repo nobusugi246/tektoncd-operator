@@ -3,10 +3,12 @@ kind: Companion
 metadata:
   name: my-tektoncd-companions
 spec:
-  namespace: tekton-pipelines
+  namespace: pipelines
   pipeline:
     version: v0.17.1
+  triggers:
+    version: v0.9.1
   dashboard:
     version: v0.10.1
-  triggers:
-    version: v0.8.1
+  kaniko:
+    version: "0.1"

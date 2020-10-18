@@ -1,6 +1,6 @@
 import kopf
 import subprocess
-from pykube import Service, Deployment, HTTPClient, KubeConfig, ObjectDoesNotExist
+from pykube import Service, Deployment, Namespace, HTTPClient, KubeConfig, ObjectDoesNotExist
 
 
 def delete(namespace, names, logger):
@@ -14,13 +14,37 @@ def delete(namespace, names, logger):
         logger.info(f'delete Service:    {str(service)}')
 
 
+@kopf.on.field('tekton.dev', 'v1beta', 'companions', field='spec.namespace')
+def namespace(spec, old, new, logger, **kwargs):
+    logger.info(f'namespace: {old=}, {new=}')
+    api = HTTPClient(KubeConfig.from_file())
+    if new:
+        obj = {
+            'apiVersion': 'v1',
+            'kind': 'Namespace',
+            'metadata': {
+                'name': new,
+            }
+        }
+        Namespace(api, obj).create()
+    elif old:
+        obj = {
+            'apiVersion': 'v1',
+            'kind': 'Namespace',
+            'metadata': {
+                'name': old,
+            }
+        }
+        Namespace(api, obj).delete()
+
+
 @kopf.on.field('tekton.dev', 'v1beta', 'companions', field='spec.pipeline.version')
 def pipeline(spec, old, new, logger, **kwargs):
     logger.info(f'pipeline: {old=}, {new=}')
     if new:
         subprocess.run(f"kubectl apply -f https://github.com/tektoncd/pipeline/releases/download/{new}/release.yaml", shell=True, check=True)
     elif old:
-        delete(spec.get('namespace', 'tekton-pipelines'),
+        delete('tekton-pipelines',
                ["tekton-pipelines-controller", "tekton-pipelines-webhook"],
                logger)
 
@@ -31,7 +55,7 @@ def triggers(spec, old, new, logger, **kwargs):
     if new:
         subprocess.run(f"kubectl apply -f https://github.com/tektoncd/triggers/releases/download/{new}/release.yaml", shell=True, check=True)
     elif old:
-        delete(spec.get('namespace', 'tekton-pipelines'),
+        delete('tekton-pipelines',
                ["tekton-triggers-controller", "tekton-triggers-webhook"],
                logger)
 
@@ -40,20 +64,32 @@ def triggers(spec, old, new, logger, **kwargs):
 def dashboard(spec, old, new, logger, **kwargs):
     logger.info(f'dashboard: {old=}, {new=}')
     if new:
-        subprocess.run(f"kubectl apply -f https://github.com/tektoncd/dashboard/releases/download/{new}/tekton-dashboard-release.yaml", shell=True, check=True)
+        subprocess.run(f"kubectl apply -f https://github.com/tektoncd/dashboard/releases/download/{new}/tekton-dashboard-release.yaml -n {spec.get('namespace', 'default')}", shell=True, check=True)
     elif old:
-        delete(spec.get('namespace', 'tekton-pipelines'),
+        delete('tekton-pipelines',
                ["tekton-dashboard"],
                logger)
+
+
+@kopf.on.field('tekton.dev', 'v1beta', 'companions', field='spec.kaniko.version')
+def dashboard(spec, old, new, logger, **kwargs):
+    logger.info(f'kaniko: {old=}, {new=}')
+    if new:
+        subprocess.run(f"kubectl apply -f https://raw.githubusercontent.com/tektoncd/catalog/master/task/kaniko/{new}/kaniko.yaml -n {spec.get('namespace', 'default')}", shell=True, check=True)
+    elif old:
+        subprocess.run(f"kubectl delete task.tekton.dev/kaniko -n {spec.get('namespace', 'tekton-pipelines')}", shell=True, check=True)
 
 
 @kopf.on.delete('tekton.dev', 'v1beta', 'companions')
 def uninstall(spec, logger, **kwargs):
     logger.info('uninstall')
     try:
-        delete(spec.get('namespace', 'tekton-pipelines'), 
+        delete('tekton-pipelines',
                ["tekton-pipelines-controller", "tekton-pipelines-webhook",
                 "tekton-triggers-controller", "tekton-triggers-webhook", "tekton-dashboard"],
                logger)
+
+        subprocess.run(f"kubectl delete task.tekton.dev/kaniko -n {spec.get('namespace', 'default')}", shell=True, check=False)
+
     except ObjectDoesNotExist:
         pass

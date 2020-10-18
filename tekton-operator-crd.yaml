@@ -22,12 +22,17 @@ spec:
                   properties:
                     version:
                       type: string
+                triggers:
+                  type: object
+                  properties:
+                    version:
+                      type: string
                 dashboard:
                   type: object
                   properties:
                     version:
                       type: string
-                triggers:
+                kaniko:
                   type: object
                   properties:
                     version:
