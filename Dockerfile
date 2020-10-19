@@ -3,8 +3,8 @@ FROM python:3.8-slim
 COPY requirements.txt /
 RUN pip install --no-cache-dir -r /requirements.txt
 
-RUN curl -L https://storage.googleapis.com/kubernetes-release/release/v1.19.3/bin/linux/amd64/kubectl -o /usr/local/bin/kubectl \
-    && chmod +x /usr/local/bin/kubectl
+ADD https://storage.googleapis.com/kubernetes-release/release/v1.19.3/bin/linux/amd64/kubectl /usr/local/bin/kubectl
+RUN chmod +x /usr/local/bin/kubectl
 
 ARG user=operator
 ARG group=operator
