@@ -104,5 +104,15 @@ def uninstall(spec, logger, **kwargs):
         subprocess.run(f"kubectl delete task.tekton.dev/kaniko -n {spec.get('namespace', 'default')}", shell=True, check=False, env=osenv)
         subprocess.run(f"kubectl delete task.tekton.dev/git-clone -n {spec.get('namespace', 'default')}", shell=True, check=False, env=osenv)
 
+        api = HTTPClient(KubeConfig.from_file())
+        obj = {
+            'apiVersion': 'v1',
+            'kind': 'Namespace',
+            'metadata': {
+                'name': spec.get('namespace'),
+            }
+        }
+        Namespace(api, obj).delete()
+
     except ObjectDoesNotExist:
         pass
