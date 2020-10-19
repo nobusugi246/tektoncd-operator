@@ -12,9 +12,12 @@ ARG HOME=/home/operator
 
 RUN mkdir -p $HOME \
     && useradd -d "$HOME" -u ${uid} -g operator -m -s /bin/bash ${user} \
-    && chown operator:operator $HOME
+    && chown operator:operator $HOME \
+    && mkdir $HOME/.kube
+
+USER ${user}
 
 ENV KUBECONFIG $HOME/.kube/config
 
-COPY operator.py $HOME/src
-CMD kopf run $HOME/src/operator.py
+COPY operator.py $HOME
+CMD kopf run $HOME/operator.py
