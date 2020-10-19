@@ -7,14 +7,11 @@ ADD https://storage.googleapis.com/kubernetes-release/release/v1.19.3/bin/linux/
 RUN chmod +x /usr/local/bin/kubectl
 
 ARG user=operator
-ARG group=operator
 ARG uid=1000
-ARG gid=1000
 ARG HOME=/home/operator
 
 RUN mkdir -p $HOME \
     && chown ${uid}:${gid} $HOME \
-    && groupadd -g ${gid} ${group} \
     && useradd -d "$_HOME" -u ${uid} -g ${gid} -m -s /bin/bash ${user}
 
 ENV KUBECONFIG $HOME/.kube/config
