@@ -1,7 +1,10 @@
+import os
 import kopf
 import subprocess
 from pykube import Service, Deployment, Namespace, HTTPClient, KubeConfig, ObjectDoesNotExist
 
+
+osenv = dict(os.environ)
 
 def delete(namespace, names, logger):
     api = HTTPClient(KubeConfig.from_file())
@@ -42,7 +45,7 @@ def namespace(spec, old, new, logger, **kwargs):
 def pipeline(spec, old, new, logger, **kwargs):
     logger.info(f'pipeline: {old=}, {new=}')
     if new:
-        subprocess.run(f"kubectl apply -f https://github.com/tektoncd/pipeline/releases/download/{new}/release.yaml", shell=True, check=True)
+        subprocess.run(f"kubectl apply -f https://github.com/tektoncd/pipeline/releases/download/{new}/release.yaml", shell=True, check=True, env=osenv)
     elif old:
         delete('tekton-pipelines',
                ["tekton-pipelines-controller", "tekton-pipelines-webhook"],
@@ -53,7 +56,7 @@ def pipeline(spec, old, new, logger, **kwargs):
 def triggers(spec, old, new, logger, **kwargs):
     logger.info(f'triggers: {old=}, {new=}')
     if new:
-        subprocess.run(f"kubectl apply -f https://github.com/tektoncd/triggers/releases/download/{new}/release.yaml", shell=True, check=True)
+        subprocess.run(f"kubectl apply -f https://github.com/tektoncd/triggers/releases/download/{new}/release.yaml", shell=True, check=True, env=osenv)
     elif old:
         delete('tekton-pipelines',
                ["tekton-triggers-controller", "tekton-triggers-webhook"],
@@ -64,7 +67,7 @@ def triggers(spec, old, new, logger, **kwargs):
 def dashboard(spec, old, new, logger, **kwargs):
     logger.info(f'dashboard: {old=}, {new=}')
     if new:
-        subprocess.run(f"kubectl apply -f https://github.com/tektoncd/dashboard/releases/download/{new}/tekton-dashboard-release.yaml -n {spec.get('namespace', 'default')}", shell=True, check=True)
+        subprocess.run(f"kubectl apply -f https://github.com/tektoncd/dashboard/releases/download/{new}/tekton-dashboard-release.yaml", shell=True, check=True, env=osenv)
     elif old:
         delete('tekton-pipelines',
                ["tekton-dashboard"],
@@ -75,18 +78,18 @@ def dashboard(spec, old, new, logger, **kwargs):
 def dashboard(spec, old, new, logger, **kwargs):
     logger.info(f'kaniko: {old=}, {new=}')
     if new:
-        subprocess.run(f"kubectl apply -f https://raw.githubusercontent.com/tektoncd/catalog/master/task/kaniko/{new}/kaniko.yaml -n {spec.get('namespace', 'default')}", shell=True, check=True)
+        subprocess.run(f"kubectl apply -f https://raw.githubusercontent.com/tektoncd/catalog/master/task/kaniko/{new}/kaniko.yaml -n {spec.get('namespace', 'default')}", shell=True, check=True, env=osenv)
     elif old:
-        subprocess.run(f"kubectl delete task.tekton.dev/kaniko -n {spec.get('namespace', 'default')}", shell=True, check=True)
+        subprocess.run(f"kubectl delete task.tekton.dev/kaniko -n {spec.get('namespace', 'default')}", shell=True, check=True, env=osenv)
 
 
 @kopf.on.field('tekton.dev', 'v1beta', 'companions', field='spec.git-clone.version')
 def dashboard(spec, old, new, logger, **kwargs):
     logger.info(f'git-clone: {old=}, {new=}')
     if new:
-        subprocess.run(f"kubectl apply -f https://raw.githubusercontent.com/tektoncd/catalog/master/task/git-clone/{new}/git-clone.yaml -n {spec.get('namespace', 'default')}", shell=True, check=True)
+        subprocess.run(f"kubectl apply -f https://raw.githubusercontent.com/tektoncd/catalog/master/task/git-clone/{new}/git-clone.yaml -n {spec.get('namespace', 'default')}", shell=True, check=True, env=osenv)
     elif old:
-        subprocess.run(f"kubectl delete task.tekton.dev/git-clone -n {spec.get('namespace', 'default')}", shell=True, check=True)
+        subprocess.run(f"kubectl delete task.tekton.dev/git-clone -n {spec.get('namespace', 'default')}", shell=True, check=True, env=osenv)
 
 
 @kopf.on.delete('tekton.dev', 'v1beta', 'companions')
@@ -98,8 +101,8 @@ def uninstall(spec, logger, **kwargs):
                 "tekton-triggers-controller", "tekton-triggers-webhook", "tekton-dashboard"],
                logger)
 
-        subprocess.run(f"kubectl delete task.tekton.dev/kaniko -n {spec.get('namespace', 'default')}", shell=True, check=False)
-        subprocess.run(f"kubectl delete task.tekton.dev/git-clone -n {spec.get('namespace', 'default')}", shell=True, check=False)
+        subprocess.run(f"kubectl delete task.tekton.dev/kaniko -n {spec.get('namespace', 'default')}", shell=True, check=False, env=osenv)
+        subprocess.run(f"kubectl delete task.tekton.dev/git-clone -n {spec.get('namespace', 'default')}", shell=True, check=False, env=osenv)
 
     except ObjectDoesNotExist:
         pass
