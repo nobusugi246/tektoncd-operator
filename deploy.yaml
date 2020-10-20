@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tekton-operator
+  namespace: common
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tekton-operator
+  template:
+    metadata:
+      labels:
+        app: tekton-operator
+    spec:
+      containers:
+        - name: tekton-operator
+          image: nobusugi246/tektoncd-operator:latest
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "1000m"
+          volumeMounts:
+            - name: kubeconfig-file
+              mountPath: "/home/operator/.kube/config"
+              readOnly: true
+      volumes:
+      - name: kubeconfig-file
+        configMap:
+          name: kubeconfig-file
