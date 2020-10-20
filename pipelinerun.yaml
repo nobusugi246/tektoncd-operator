@@ -75,7 +75,7 @@ spec:
     name: kaniko-build-pipeline
   params:
   - name: image
-    value: container-registry.common:5000/tektoncd-operator:v0.5.0
+    value: container-registry.common:5000/tektoncd-operator:v0.6.0
   workspaces:
   - name: shared-workspace
     persistentvolumeclaim:
