@@ -17,6 +17,9 @@ spec:
         - name: tekton-operator
           image: nobusugi246/tektoncd-operator:latest
           imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: tekton-operator-env-vars
           resources:
             requests:
               memory: "128Mi"

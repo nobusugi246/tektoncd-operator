@@ -11,3 +11,6 @@ configMapGenerator:
 - name: kubeconfig-file
   files:
   - config
+- name: tekton-operator-env-vars
+  literals:
+    - key=value
