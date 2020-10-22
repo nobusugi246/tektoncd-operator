@@ -27,8 +27,8 @@ spec:
           volumeMounts:
             - name: kubeconfig-file
               mountPath: "/home/operator/.kube/config"
-              readOnly: true
+              subPath: "config"
       volumes:
-      - name: kubeconfig-file
-        configMap:
-          name: kubeconfig-file
+        - name: kubeconfig-file
+          configMap:
+            name: kubeconfig-file

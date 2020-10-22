@@ -10,4 +10,4 @@ resources:
 configMapGenerator:
 - name: kubeconfig-file
   files:
-  - kubeconfig.txt
+  - config
