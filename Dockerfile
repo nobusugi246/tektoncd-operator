@@ -9,11 +9,10 @@ RUN chmod +x /usr/local/bin/kubectl
 ARG user=operator
 ARG group=operator
 ARG uid=1000
-ARG gid=1000
+ARG gid=37
 ARG HOME=/home/operator
 
-RUN groupadd -g ${gid} ${group} \
-    && useradd -d "$HOME" -u ${uid} -g ${group} -m -s /bin/bash ${user} \
+RUN useradd -d "$HOME" -u ${uid} -g ${group} -m -s /bin/bash ${user} \
     && mkdir -p $HOME \
     && chown ${uid}:${gid} $HOME \
     && mkdir $HOME/.kube
