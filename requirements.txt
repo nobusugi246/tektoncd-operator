@@ -2,3 +2,4 @@ kopf
 kubernetes
 pykube-ng
 pyyaml
+jinja2
